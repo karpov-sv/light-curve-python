@@ -1,10 +1,10 @@
 [package]
 name = "light-curve-python"
 version = "0.8.0"
-authors = ["Konstantin Malanchev <hombit@gmail.com>", "Anastasia Lavrukhina <lavrukhina.ad@gmail.com>"]
+authors = ["Konstantin Malanchev <hombit@gmail.com>", "Anastasia Lavrukhina <lavrukhina.ad@gmail.com>, Etienne Russeil <etiennerusseil63@gmail.com>"]
 description = "Feature extractor from noisy time series"
 readme = "README.md"
-repository = "https://github.com/light-curve/light-curve-python"
+repository = "https://github.com/erusseil/light-curve-python"
 license = "GPL-3.0-or-later"
 edition = "2021"
 rust-version = "1.67"

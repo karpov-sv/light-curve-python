@@ -253,14 +253,12 @@ class RainbowFit(BaseMultiBandFeature):
         # Internally we use amplitude of F_bol / <nu> instead of F_bol.
         amplitude = amplitude * m_scale * self.average_nu
         rise_time = rise_time * t_scale
-        fall_time = fall_time * t_scale
-        _t0, T_min, delta_T, k_sig = minuit.values[self.temp_params_idx]
-        k_sig = k_sig * t_scale
+        temperature = minuit.values[self.temp_params_idx]
         baselines = []
         if self.with_baseline:
             baselines = np.asarray(minuit.values[len(P) :]) * m_scale + np.array(list(m_shift_dict.values()))
 
-        return np.r_[[t0, amplitude, rise_time, fall_time, T_min, delta_T, k_sig], baselines, reduced_chi2]
+        return np.r_[[t0, amplitude, rise_time, temperature], baselines, reduced_chi2]
 
     # This is abstract class, but we could use default implementation while _eval is defined
     def _eval_and_fill(self, *, t, m, sigma, band, fill_value):
