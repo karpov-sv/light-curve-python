@@ -143,7 +143,7 @@ class RainbowFit(BaseMultiBandFeature):
         return amplitude / (1.0 + np.exp(-dt / rise_time))
 
     def temp_func(self, t, params):
-        return params[self.temp_params_idx]
+        return np.array([params[self.temp_params_idx]] * len(t))
 
     @staticmethod
     def planck_nu(wave_cm, T):
