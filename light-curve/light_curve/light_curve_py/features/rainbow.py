@@ -143,7 +143,9 @@ class RainbowFit(BaseMultiBandFeature):
         return amplitude / (1.0 + np.exp(-dt / rise_time))
 
     def temp_func(self, t, params):
-        return np.array([params[self.temp_params_idx]] * len(t))
+        tp = params[self.temp_params_idx]
+        return np.array([tp[0]] * len(t))
+
 
     @staticmethod
     def planck_nu(wave_cm, T):
@@ -248,12 +250,12 @@ class RainbowFit(BaseMultiBandFeature):
         minuit.migrad()
 
         reduced_chi2 = minuit.fval / (len(t) - len(minuit.values))
-        t0, amplitude, rise_time, fall_time = minuit.values[self.bol_params_idx]
+        t0, amplitude, rise_time = minuit.values[self.bol_params_idx]
         t0 = t0 * t_scale + t_shift
         # Internally we use amplitude of F_bol / <nu> instead of F_bol.
         amplitude = amplitude * m_scale * self.average_nu
         rise_time = rise_time * t_scale
-        temperature = minuit.values[self.temp_params_idx]
+        temperature = minuit.values[self.temp_params_idx][0]
         baselines = []
         if self.with_baseline:
             baselines = np.asarray(minuit.values[len(P) :]) * m_scale + np.array(list(m_shift_dict.values()))
