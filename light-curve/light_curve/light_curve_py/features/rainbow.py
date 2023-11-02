@@ -180,7 +180,8 @@ class RainbowFit(BaseMultiBandFeature):
         """Model function for the fit."""
         band_idx = self.lookup_band_idx(band)
         wave_cm = self.wave_cm_array[band_idx]
-        params = np.array(list(params))
+        params = np.array(list(params[0]))
+        
         # Internally we use amplitude of F_bol / <nu> instead of F_bol.
         params[P.amplitude] /= self.average_nu
         return self._lsq_model((t, band_idx, wave_cm), *params)
@@ -260,7 +261,7 @@ class RainbowFit(BaseMultiBandFeature):
         if self.with_baseline:
             baselines = np.asarray(minuit.values[len(P) :]) * m_scale + np.array(list(m_shift_dict.values()))
 
-        return np.r_[[t0, amplitude, rise_time, temperature], baselines, reduced_chi2]
+        return np.r_[[t0, amplitude, rise_time, temperature], baselines, reduced_chi2], np.array(list(minuit.errors))
 
     # This is abstract class, but we could use default implementation while _eval is defined
     def _eval_and_fill(self, *, t, m, sigma, band, fill_value):
