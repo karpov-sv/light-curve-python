@@ -152,7 +152,6 @@ class RainbowFit(BaseMultiBandFeature):
         return amplitude / (1.0 + np.exp(-dt / rise_time))
 
     def temp_func(self, t, params):
-        
         if self.with_temperature_evolution:
             t0, T_min, delta_T, k_sig = params[self.temp_params_idx]
             dt = t - t0
@@ -215,6 +214,8 @@ class RainbowFit(BaseMultiBandFeature):
         return list(P.__members__) + self._baseline_names
 
     def _eval(self, *, t, m, sigma, band):
+        
+        fixed_temperature = len(np.unique(band))==1
         # normalize input data
         t_shift = np.mean(t)
         t_scale = np.std(t)
@@ -244,7 +245,6 @@ class RainbowFit(BaseMultiBandFeature):
         m_amplitude = np.ptp(m)
 
         if self.with_temperature_evolution:
-
             initial_guesses = {
                 "reference_time": 0.0,
                 "amplitude": 1.0,
@@ -262,12 +262,18 @@ class RainbowFit(BaseMultiBandFeature):
                 "k_sig": (0.0, 10 * t_amplitude),
             }
             
+            if fixed_temperature:
+                limits['Tmin'] = (initial_guesses['Tmin'], initial_guesses['Tmin'])
+                limits['delta_T'] = (initial_guesses['delta_T'], initial_guesses['delta_T'])
+                limits['k_sig'] = (initial_guesses['k_sig'], initial_guesses['k_sig'])
+                
+            
         else :
             initial_guesses = {
                 "reference_time": 0.0,
                 "amplitude": 1.0,
                 "rise_time": 1.0,
-                "temperature": 30000
+                "temperature": 20000
             }
             limits = {
                 "reference_time": (t[0] - 10 * t_amplitude, t[-1] + 10 * t_amplitude),
@@ -276,6 +282,9 @@ class RainbowFit(BaseMultiBandFeature):
                 "temperature": (1000, 100000),
             }
             
+            if fixed_temperature:
+                limits['temperature'] = (initial_guesses['temperature'], initial_guesses['temperature'])
+
         if self.with_baseline:
             initial_guesses.update(dict.fromkeys(self._baseline_names, 0.0))
             baseline_limits = (np.min(m) - 10 * m_amplitude, np.max(m))
