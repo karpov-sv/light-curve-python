@@ -15,7 +15,9 @@ class P(IntEnum):
     reference_time = 0
     amplitude = 1
     rise_time = 2
-    temperature = 3
+    Tmin = 3
+    delta_T = 4
+    k_sig = 5
 
 
 
@@ -70,6 +72,9 @@ class RainbowFit(BaseMultiBandFeature):
 
     with_baseline: bool = dataclass_field(default=True, kw_only=True)
     """Whether to include a baseline in the fit, one per band."""
+    
+    with_temperature_evolution: bool = dataclass_field(default=True, kw_only=True)
+    """Whether to include a baseline in the fit, one per band."""
 
     @property
     def is_band_required(self) -> bool:
@@ -96,8 +101,12 @@ class RainbowFit(BaseMultiBandFeature):
             raise ValueError("At least one band must be specified.")
 
         self.bol_params_idx = np.array([P.reference_time, P.amplitude, P.rise_time])
-        self.temp_params_idx = np.array([P.temperature])
-
+        
+        if self.with_temperature_evolution:
+            self.temp_params_idx = np.array([P.reference_time, P.Tmin, P.delta_T, P.k_sig])
+        else:
+            self.temp_params_idx = np.array([P.Tmin])
+            
         band_to_index = {band: i for i, band in enumerate(self.band_wave_cm)}
         self.lookup_band_idx = np.vectorize(band_to_index.get)
 
@@ -108,16 +117,16 @@ class RainbowFit(BaseMultiBandFeature):
         self.average_nu = speed_of_light / np.mean(self.wave_cm_array)
 
     @classmethod
-    def from_nm(cls, band_wave_nm, with_baseline=True):
+    def from_nm(cls, band_wave_nm, with_baseline=True, with_temperature_evolution=False):
         """Initialize from a dictionary of band names and their effective wavelengths in nm."""
         band_wave_nm = {band: 1e-7 * wavelength for band, wavelength in band_wave_nm.items()}
-        return cls(band_wave_cm=band_wave_nm, with_baseline=with_baseline)
+        return cls(band_wave_cm=band_wave_nm, with_baseline=with_baseline, with_temperature_evolution=with_temperature_evolution)
 
     @classmethod
-    def from_angstrom(cls, band_wave_aa, with_baseline=True):
+    def from_angstrom(cls, band_wave_aa, with_baseline=True, with_temperature_evolution=False):
         """Initialize from a dictionary of band names and their effective wavelengths in angstroms."""
         band_wave_aa = {band: 1e-8 * wavelength for band, wavelength in band_wave_aa.items()}
-        return cls(band_wave_cm=band_wave_aa, with_baseline=with_baseline)
+        return cls(band_wave_cm=band_wave_aa, with_baseline=with_baseline, with_temperature_evolution=with_temperature_evolution)
 
     @staticmethod
     def _check_iminuit():
@@ -143,6 +152,12 @@ class RainbowFit(BaseMultiBandFeature):
         return amplitude / (1.0 + np.exp(-dt / rise_time))
 
     def temp_func(self, t, params):
+        
+        if self.with_temperature_evolution:
+            t0, T_min, delta_T, k_sig = params[self.temp_params_idx]
+            dt = t - t0
+            return T_min + delta_T / (1.0 + np.exp(dt / k_sig))
+        
         tp = params[self.temp_params_idx]
         return np.array([tp[0]] * len(t))
 
@@ -161,7 +176,6 @@ class RainbowFit(BaseMultiBandFeature):
         """Model function for the fit."""
         t, band_idx, wave_cm = x
         params = np.array(list(params))
-
         # Internally we use amplitude of F_bol / <nu> instead of F_bol.
         # It makes amplitude to be in the same units and the same order as
         # the baselines and input fluxes.
@@ -172,6 +186,9 @@ class RainbowFit(BaseMultiBandFeature):
         flux = np.pi * self.planck_nu(wave_cm, T) / (sigma_sb * T**4) * bol
         if self.with_baseline:
             baseline_param_idx = band_idx + len(P)
+            if not self.with_temperature_evolution:
+                baseline_param_idx -= 2
+                
             baselines = params[baseline_param_idx]
             flux += baselines
         return flux
@@ -207,7 +224,13 @@ class RainbowFit(BaseMultiBandFeature):
         # so no need to subtract the mean.
         m_shift_dict = dict.fromkeys(self.band_wave_cm, 0.0)
         if self.with_baseline:
-            m_shift_dict = {b: np.mean(m[band == b]) for b in self.band_wave_cm}
+            for b in self.band_wave_cm:
+                sub_m = m[band == b]
+                if len(sub_m) != 0 :
+                    m_shift_dict[b] = np.mean(sub_m)
+                else:
+                    m_shift_dict[b] = 0
+                    
         m_shift_array = np.array([m_shift_dict[band] for band in band])
         # copy array here to avoid modifying the input
         m = m - m_shift_array
@@ -220,18 +243,39 @@ class RainbowFit(BaseMultiBandFeature):
         t_amplitude = t[-1] - t[0]
         m_amplitude = np.ptp(m)
 
-        initial_guesses = {
-            "reference_time": 0.0,
-            "amplitude": 1.0,
-            "rise_time": 1.0,
-            "temperature": 30000
-        }
-        limits = {
-            "reference_time": (t[0] - 10 * t_amplitude, t[-1] + 10 * t_amplitude),
-            "amplitude": (0.0, 10 * m_amplitude),
-            "rise_time": (0.0, 10 * t_amplitude),
-            "temperature": (1000, 100000),
-        }
+        if self.with_temperature_evolution:
+
+            initial_guesses = {
+                "reference_time": 0.0,
+                "amplitude": 1.0,
+                "rise_time": 1.0,
+                "Tmin": 4000.0,
+                "delta_T": 7000.0,
+                "k_sig": 1.0,
+            }
+            limits = {
+                "reference_time": (t[0] - 10 * t_amplitude, t[-1] + 10 * t_amplitude),
+                "amplitude": (0.0, 10 * m_amplitude),
+                "rise_time": (0.0, 10 * t_amplitude),
+                "Tmin": (1e2, 1e6),  # K
+                "delta_T": (0.0, 1e6),  # K
+                "k_sig": (0.0, 10 * t_amplitude),
+            }
+            
+        else :
+            initial_guesses = {
+                "reference_time": 0.0,
+                "amplitude": 1.0,
+                "rise_time": 1.0,
+                "temperature": 30000
+            }
+            limits = {
+                "reference_time": (t[0] - 10 * t_amplitude, t[-1] + 10 * t_amplitude),
+                "amplitude": (0.0, 10 * m_amplitude),
+                "rise_time": (0.0, 10 * t_amplitude),
+                "temperature": (1000, 100000),
+            }
+            
         if self.with_baseline:
             initial_guesses.update(dict.fromkeys(self._baseline_names, 0.0))
             baseline_limits = (np.min(m) - 10 * m_amplitude, np.max(m))
@@ -239,7 +283,7 @@ class RainbowFit(BaseMultiBandFeature):
 
         band_idx = self.lookup_band_idx(band)
         wave_cm = self.wave_cm_array[band_idx]
-
+        
         least_squares = LeastSquares(
             model=self._lsq_model,
             parameters=limits,
@@ -249,19 +293,30 @@ class RainbowFit(BaseMultiBandFeature):
         )
         minuit = self.Minuit(least_squares, **initial_guesses)
         minuit.migrad()
-
+        
         reduced_chi2 = minuit.fval / (len(t) - len(minuit.values))
         t0, amplitude, rise_time = minuit.values[self.bol_params_idx]
         t0 = t0 * t_scale + t_shift
         # Internally we use amplitude of F_bol / <nu> instead of F_bol.
         amplitude = amplitude * m_scale * self.average_nu
         rise_time = rise_time * t_scale
-        temperature = minuit.values[self.temp_params_idx][0]
+        
         baselines = []
         if self.with_baseline:
-            baselines = np.asarray(minuit.values[len(P) :]) * m_scale + np.array(list(m_shift_dict.values()))
-
-        return np.r_[[t0, amplitude, rise_time, temperature], baselines, reduced_chi2], np.array(list(minuit.errors))
+            arg_base = len(P)
+            if not self.with_temperature_evolution:
+                arg_base -= 2
+                
+            baselines = np.asarray(minuit.values[arg_base :]) * m_scale + np.array(list(m_shift_dict.values()))
+            
+        if self.with_temperature_evolution:
+            _t0, T_min, delta_T, k_sig = minuit.values[self.temp_params_idx]
+            k_sig = k_sig * t_scale
+            return np.r_[[t0, amplitude, rise_time, T_min, delta_T, k_sig], baselines, reduced_chi2], np.array(list(minuit.errors))
+            
+        else:
+            temperature = minuit.values[self.temp_params_idx][0]
+            return np.r_[[t0, amplitude, rise_time, temperature], baselines, reduced_chi2], np.array(list(minuit.errors))
 
     # This is abstract class, but we could use default implementation while _eval is defined
     def _eval_and_fill(self, *, t, m, sigma, band, fill_value):
