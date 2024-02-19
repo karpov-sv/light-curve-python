@@ -1,10 +1,10 @@
 [package]
 name = "light-curve-python"
-version = "0.8.0"
-authors = ["Konstantin Malanchev <hombit@gmail.com>", "Anastasia Lavrukhina <lavrukhina.ad@gmail.com>, Etienne Russeil <etiennerusseil63@gmail.com>"]
+version = "0.8.1"
+authors = ["Konstantin Malanchev <hombit@gmail.com>", "Anastasia Lavrukhina <lavrukhina.ad@gmail.com>"]
 description = "Feature extractor from noisy time series"
 readme = "README.md"
-repository = "https://github.com/erusseil/light-curve-python"
+repository = "https://github.com/light-curve/light-curve-python"
 license = "GPL-3.0-or-later"
 edition = "2021"
 rust-version = "1.67"
@@ -18,7 +18,7 @@ lto = true
 codegen-units = 1
 
 [features]
-default = ["ceres-source", "fftw-source", "gsl"]
+default = ["ceres-source", "fftw-source", "gsl", "mimalloc"]
 abi3 = ["abi3-py311"]
 abi3-py311 = ["pyo3/abi3-py311"]
 ceres-source = ["light-curve-feature/ceres-source"]
@@ -27,14 +27,16 @@ fftw-source = ["light-curve-feature/fftw-source"]
 fftw-system = ["light-curve-feature/fftw-system"]
 fftw-mkl = ["light-curve-feature/fftw-mkl"]
 gsl = ["light-curve-feature/gsl"]
+mimalloc = ["dep:mimalloc"]
 
 [dependencies]
-const_format = "0.2.31"
+const_format = "0.2.32"
 conv = "0.3.3"
-enum-iterator = "1.4.1"
+enum-iterator = "1.5.0"
 enumflags2 = { version = "0.7.7", features = ["serde"] }
-itertools = "0.11.0"
+itertools = "0.12.1"
 macro_const = "0.1.0"
+mimalloc = { version = "0.1.39", features = ["local_dynamic_tls"], optional=true }
 ndarray = { version = "0.15.3", features = ["rayon"] }
 numpy = "0.19.0"
 num_cpus = "1.13.0"
@@ -43,11 +45,11 @@ once_cell = "1"
 pyo3 = {version = "0.19.2", features = ["extension-module", "multiple-pymethods"]}
 rand = "0.8.5"
 rand_xoshiro = "0.6.0"
-thiserror = "1.0.49"
+rayon = "1.8.1"
 serde = { version = "1", features = ["derive"] }
 serde-pickle = "1"
 serde_json = "1"
-rayon = "1.8.0"
+thiserror = "1.0.50"
 unzip3 = "1.0.0"
 
 [dependencies.light-curve-dmdt]

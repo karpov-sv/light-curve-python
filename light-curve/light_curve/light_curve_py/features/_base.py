@@ -34,17 +34,9 @@ class BaseMultiBandFeature(ABC):
         """It has a default implementation, but it requires _eval to be implemented"""
         try:
             a = self._eval(t=t, m=m, sigma=sigma, band=band)
-            if type(a)==tuple:
-                a, minuit = a
-                if np.any(~np.isfinite(a)):
-                    raise ValueError
-                return a, minuit
-            
-            else:
-                if np.any(~np.isfinite(a)):
-                    raise ValueError
-                return a
-            
+            if np.any(~np.isfinite(a)):
+                raise ValueError
+            return a
         except (ValueError, ZeroDivisionError) as e:
             if fill_value is not None:
                 return np.full(self.size, fill_value)
