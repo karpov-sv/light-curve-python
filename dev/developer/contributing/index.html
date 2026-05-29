@@ -1552,6 +1552,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#docs-preview-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docs preview CI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#free-threaded-python" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1680,6 +1691,17 @@
     <span class="md-ellipsis">
       
         Updating the documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docs-preview-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docs preview CI
       
     </span>
   </a>
@@ -1864,13 +1886,13 @@ Rust code with <code>maturin develop</code> after any Rust change. Python-only c
 <li>Update <code>CHANGELOG.md</code>.</li>
 </ol>
 <h2 id="updating-the-documentation">Updating the documentation<a class="headerlink" href="#updating-the-documentation" title="Permanent link">&para;</a></h2>
-<p>Docs live on the <code>documentation</code> branch. After switching to it:</p>
+<p>Docs live in <code>docs/</code> on the <code>main</code> branch. To preview locally:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>pip<span class="w"> </span>install<span class="w"> </span>maturin
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">cd</span><span class="w"> </span>light-curve<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>maturin<span class="w"> </span>develop<span class="w"> </span>--extras<span class="o">=</span>full<span class="w"> </span>--group<span class="o">=</span>docs<span class="w"> </span>-q<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>..
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>mkdocs<span class="w"> </span>serve<span class="w">   </span><span class="c1"># live preview at http://127.0.0.1:8000</span>
 </code></pre></div>
-<p><strong>When adding a new feature extractor</strong>, update the docs on the <code>documentation</code> branch:</p>
+<p><strong>When adding a new feature extractor</strong>, update the docs:</p>
 <ol>
 <li><strong>Feature table</strong> — <code>docs/features/index.md</code>: add a row to the appropriate category table (manually maintained).</li>
 <li><strong>API page</strong> — <code>docs/features/api/&lt;category&gt;.md</code>: add a <code>:::</code> autodoc entry:
@@ -1878,10 +1900,14 @@ Rust code with <code>maturin develop</code> after any Rust change. Python-only c
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    options:
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>      heading_level: 3
 </code></pre></div></li>
-<li>Commit and push to <code>documentation</code>; CI deploys automatically to the <code>dev</code> version of the site.</li>
+<li>Commit and push; CI deploys automatically to the <code>dev</code> version of the site on merge to <code>main</code>.</li>
 </ol>
 <p>The API reference prose (parameter descriptions, equations) is read from the Python
 docstrings, so updating those in the source is enough — no manual copy-paste needed.</p>
+<h2 id="docs-preview-ci">Docs preview CI<a class="headerlink" href="#docs-preview-ci" title="Permanent link">&para;</a></h2>
+<p>Every pull request gets an automatic docs preview at <code>https://light-curve.snad.space/pr&lt;N&gt;/</code>, posted as a comment by the bot.</p>
+<p>The preview is built by the <strong>Docs Preview</strong> job in <code>docs.yml</code>, which uses a <code>pull_request_target</code> trigger so it has write access even for PRs from forks. It explicitly checks out the PR head commit to build the actual PR content.</p>
+<p>Stale previews (from merged or closed PRs) are removed the next time anything is pushed to <code>main</code>.</p>
 <h2 id="free-threaded-python">Free-threaded Python<a class="headerlink" href="#free-threaded-python" title="Permanent link">&para;</a></h2>
 <p>Free-threaded CPython (PEP 703) is supported from <strong>Python 3.14t</strong> onward.
 Python 3.13t is not supported. To build for free-threaded Python, use

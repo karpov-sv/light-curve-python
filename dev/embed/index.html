@@ -1564,8 +1564,8 @@ anomaly detection, and similarity search.</p>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <p>Install <code>light-curve</code> together with its ML embedding dependencies so all versions
 resolve jointly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;light-curve[full]&#39;</span><span class="w"> </span>onnxruntime<span class="w"> </span>huggingface_hub<span class="w">   </span><span class="c1"># CPU</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">&#39;light-curve[full]&#39;</span><span class="w"> </span>onnxruntime-gpu<span class="w"> </span>huggingface_hub<span class="w">  </span><span class="c1"># NVIDIA GPU</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>light-curve<span class="w"> </span>onnxruntime<span class="w"> </span>huggingface_hub<span class="w">   </span><span class="c1"># CPU</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pip<span class="w"> </span>install<span class="w"> </span>light-curve<span class="w"> </span>onnxruntime-gpu<span class="w"> </span>huggingface_hub<span class="w">  </span><span class="c1"># NVIDIA GPU</span>
 </code></pre></div>
 <p><code>onnxruntime</code> is intentionally not bundled in the <code>light-curve[full]</code> extra — pick
 the variant that matches your hardware. See the <a href="https://onnxruntime.ai/docs/install/">onnxruntime install guide</a> for other providers.</p>

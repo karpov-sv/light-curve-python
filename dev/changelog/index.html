@@ -1434,6 +1434,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#0125-2026-05-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.12.5] 2026-05-27
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0124-2026-05-20" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2129,6 +2140,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#0125-2026-05-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.12.5] 2026-05-27
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0124-2026-05-20" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2755,24 +2777,7 @@
 and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <h2 id="unreleased">[Unreleased]<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
-<ul>
-<li>New <code>AstraCLR</code> embedding model in <code>light_curve.embed</code>: a contrastive-learning transformer encoder
-  pretrained on ZTF <em>g</em>, <em>r</em>, <em>i</em> photometry on ZTF DR16 (MJD 58 194 – 59 951, Majumder et al.
-  2026, in prep). Accepts <code>(mjd, mag, magerr, band)</code> — times must be in MJD — and returns
-  512-dimensional embeddings. Load with <code>AstraCLR.from_hf(band_groups={"g": 0, "r": 1, "i": 2})</code>.</li>
-<li>New <code>Middle</code> reduction strategy in <code>light_curve.embed</code>: selects observations centred on the
-  temporal midpoint of the light curve. Available for all embedding models via <code>reduction="middle"</code>.</li>
-<li>New documentation site with MkDocs + Material for MkDocs at https://light-curve.snad.space/:<ul>
-<li>Tutorials for feature extraction basics, periodogram, curve fitting, multiband features,
-  dm-dt maps, and light-curve embeddings</li>
-<li>Full API reference for all feature extractors, <code>DmDt</code>, and embedding models</li>
-<li><em>Citing &amp; Support</em> page with BibTeX entries for all related papers</li>
-</ul>
-</li>
-<li>CI: each pull request gets a live docs preview deployed to <code>/pr{N}/</code></li>
-<li>Two new embed tutorials: Roman transient classification with ATCAT and ZTF similarity search
-  (<a href="https://github.com/light-curve/light-curve-python/pull/720">#720</a>)</li>
-</ul>
+<p>--</p>
 <h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
 <p>--</p>
 <h3 id="deprecated">Deprecated<a class="headerlink" href="#deprecated" title="Permanent link">&para;</a></h3>
@@ -2783,8 +2788,27 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 <p>--</p>
 <h3 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h3>
 <p>--</p>
-<h2 id="0124-2026-05-20">[0.12.4] 2026-05-20<a class="headerlink" href="#0124-2026-05-20" title="Permanent link">&para;</a></h2>
+<h2 id="0125-2026-05-27">[0.12.5] 2026-05-27<a class="headerlink" href="#0125-2026-05-27" title="Permanent link">&para;</a></h2>
 <h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>New <code>AstraCLR</code> embedding model in <code>light_curve.embed</code>: a contrastive-learning transformer encoder
+  pretrained on ZTF <em>g</em>, <em>r</em>, <em>i</em> photometry on ZTF DR16 (MJD 58 194 – 59 951, Majumder et al.
+  2026, in prep). Accepts <code>(mjd, mag, magerr, band)</code> — times must be in MJD — and returns
+  512-dimensional embeddings. Load with <code>AstraCLR.from_hf(band_groups={"g": 0, "r": 1, "i": 2})</code>.</li>
+<li>New <code>Middle</code> reduction strategy in <code>light_curve.embed</code>: selects observations centred on the
+  temporal midpoint of the light curve. Available for all embedding models via <code>reduction="middle"</code>.</li>
+<li>New documentation site with MkDocs + Material for MkDocs at https://light-curve.snad.space/
+  <a href="https://github.com/light-curve/light-curve-python/pull/703">(703)</a></li>
+<li>CI: each pull request gets a live docs preview deployed to <code>/pr{N}/</code></li>
+</ul>
+<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Breaking experimental feature</strong> <code>RainbowFit</code>'s UV extincted BB model was simplified to have
+  a single parameter instead of two
+  <a href="https://github.com/light-curve/light-curve-python/pull/726">(726)</a></li>
+</ul>
+<h2 id="0124-2026-05-20">[0.12.4] 2026-05-20<a class="headerlink" href="#0124-2026-05-20" title="Permanent link">&para;</a></h2>
+<h3 id="added_2">Added<a class="headerlink" href="#added_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>Periodogram</code> now accepts a <code>phase_features</code> argument: features extracted from the light curve
   phase-folded at the best period
@@ -2797,13 +2821,13 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
   (default, preserves old behavior) and UV-extincted black-body
   (<a href="https://github.com/light-curve/light-curve-python/pull/705">#705</a>).</li>
 </ul>
-<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
+<h3 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Breaking</strong> The underlying <code>nuts-rs</code> crate has been updated, so specific non-linear optimization
   results may change (<a href="https://github.com/light-curve/light-curve-python/pull/701">#701</a>).</li>
 </ul>
 <h2 id="0123-2026-05-14">[0.12.3] 2026-05-14<a class="headerlink" href="#0123-2026-05-14" title="Permanent link">&para;</a></h2>
-<h3 id="added_2">Added<a class="headerlink" href="#added_2" title="Permanent link">&para;</a></h3>
+<h3 id="added_3">Added<a class="headerlink" href="#added_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>New experimental <code>light_curve.embed</code> module with ONNX-backed light-curve embedding
   models (<a href="https://github.com/light-curve/light-curve-python/pull/692">#692</a>):<ul>
@@ -2818,7 +2842,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 </li>
 </ul>
 <h2 id="0122-2026-05-09">[0.12.2] 2026-05-09<a class="headerlink" href="#0122-2026-05-09" title="Permanent link">&para;</a></h2>
-<h3 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h3>
+<h3 id="changed_3">Changed<a class="headerlink" href="#changed_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Development and test dependencies are moved from project extras to <code>dependency-groups</code> in <code>pyproject.toml</code>,
   so only
@@ -2830,20 +2854,20 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
   macOS (<a href="https://github.com/light-curve/light-curve-python/pull/694">#694</a>)</li>
 </ul>
 <h2 id="0121-2026-04-09">[0.12.1] 2026-04-09<a class="headerlink" href="#0121-2026-04-09" title="Permanent link">&para;</a></h2>
-<h3 id="changed_3">Changed<a class="headerlink" href="#changed_3" title="Permanent link">&para;</a></h3>
+<h3 id="changed_4">Changed<a class="headerlink" href="#changed_4" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Windows PyPI wheels now include Ceres and GSL support, enabled via
   vcpkg https://github.com/light-curve/light-curve-python/pull/661</li>
 </ul>
 <h2 id="0120-2026-03-24">[0.12.0] 2026-03-24<a class="headerlink" href="#0120-2026-03-24" title="Permanent link">&para;</a></h2>
-<h3 id="added_3">Added<a class="headerlink" href="#added_3" title="Permanent link">&para;</a></h3>
+<h3 id="added_4">Added<a class="headerlink" href="#added_4" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>BazinFit</code>, <code>LinexpFit</code>, and <code>VillarFit</code> gained <code>nuts</code>, <code>nuts-ceres</code>, and <code>nuts-lmsder</code> algorithms using
   NUTS (No-U-Turn Sampler) for gradient-based Hamiltonian Monte Carlo optimization. New <code>nuts_ntune</code> and
   <code>nuts_niter</code> parameters control the number of tuning and drawing iterations
   respectively https://github.com/light-curve/light-curve-python/pull/635</li>
 </ul>
-<h3 id="changed_4">Changed<a class="headerlink" href="#changed_4" title="Permanent link">&para;</a></h3>
+<h3 id="changed_5">Changed<a class="headerlink" href="#changed_5" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>API breaking</strong>: <code>.many()</code> now requires <code>arrow_fields</code> argument when called with an Arrow array. Pass a
   list of 2 or 3 field names (str) or indices (int) to select <code>t</code>, <code>m</code>, and optionally <code>sigma</code> from the
@@ -2866,7 +2890,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 <h3 id="security_1">Security<a class="headerlink" href="#security_1" title="Permanent link">&para;</a></h3>
 <p>--</p>
 <h2 id="0111-2026-02-16">[0.11.1] 2026-02-16<a class="headerlink" href="#0111-2026-02-16" title="Permanent link">&para;</a></h2>
-<h3 id="added_4">Added<a class="headerlink" href="#added_4" title="Permanent link">&para;</a></h3>
+<h3 id="added_5">Added<a class="headerlink" href="#added_5" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Arrow input support for <code>.many()</code>: pass a <code>List&lt;Struct&lt;t, m[, sigma]&gt;&gt;</code> Arrow array (or chunked array)
   instead of a list of tuples. Works with any library implementing the Arrow C Data Interface,
@@ -2876,13 +2900,13 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
   float64). https://github.com/light-curve/light-curve-python/pull/621</li>
 </ul>
 <h2 id="0110-2026-02-12">[0.11.0] 2026-02-12<a class="headerlink" href="#0110-2026-02-12" title="Permanent link">&para;</a></h2>
-<h3 id="added_5">Added<a class="headerlink" href="#added_5" title="Permanent link">&para;</a></h3>
+<h3 id="added_6">Added<a class="headerlink" href="#added_6" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>Periodogram</code> now accepts a <code>normalization</code> parameter (<code>'psd'</code>, <code>'standard'</code>, <code>'model'</code>, <code>'log'</code>) affecting
   <code>power()</code> and <code>freq_power()</code> outputs. Default is <code>'psd'</code> (unchanged behavior). The <code>'standard'</code>, <code>'model'</code>,
   and <code>'log'</code> normalizations are consistent with astropy's <code>LombScargle</code>.</li>
 </ul>
-<h3 id="changed_5">Changed<a class="headerlink" href="#changed_5" title="Permanent link">&para;</a></h3>
+<h3 id="changed_6">Changed<a class="headerlink" href="#changed_6" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>PyPI wheels changes</strong>:<ul>
 <li>Minimum supported Python version bumped from 3.9 to
@@ -2912,7 +2936,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
   feature</li>
 </ul>
 <h2 id="0105-2025-11-26">[0.10.5] 2025-11-26<a class="headerlink" href="#0105-2025-11-26" title="Permanent link">&para;</a></h2>
-<h3 id="changed_6">Changed<a class="headerlink" href="#changed_6" title="Permanent link">&para;</a></h3>
+<h3 id="changed_7">Changed<a class="headerlink" href="#changed_7" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Bump <code>pyO3</code> and <code>rust-numpy</code> from 0.25.0 to 0.27.0: introduce Python build 3.14/3.14t
   support https://github.com/light-curve/light-curve-python/pull/553 https://github.com/light-curve/light-curve-python/pull/590</li>
@@ -2926,18 +2950,18 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
   object https://github.com/light-curve/light-curve-python/pull/532</li>
 </ul>
 <h2 id="0104-2025-06-11">[0.10.4] 2025-06-11<a class="headerlink" href="#0104-2025-06-11" title="Permanent link">&para;</a></h2>
-<h3 id="added_6">Added<a class="headerlink" href="#added_6" title="Permanent link">&para;</a></h3>
+<h3 id="added_7">Added<a class="headerlink" href="#added_7" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Periodogram(freqs: ArrayLike | None = None) is added to set fixed user-defined frequency
   grids https://github.com/light-curve/light-curve-python/pull/528</li>
 <li><code>Periodogram.power</code> method https://github.com/light-curve/light-curve-python/pull/529</li>
 </ul>
-<h3 id="changed_7">Changed<a class="headerlink" href="#changed_7" title="Permanent link">&para;</a></h3>
+<h3 id="changed_8">Changed<a class="headerlink" href="#changed_8" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Bump <code>light-curve-feature</code> to 0.10.0</li>
 </ul>
 <h2 id="0103-2025-05-22">[0.10.3] 2025-05-22<a class="headerlink" href="#0103-2025-05-22" title="Permanent link">&para;</a></h2>
-<h3 id="added_7">Added<a class="headerlink" href="#added_7" title="Permanent link">&para;</a></h3>
+<h3 id="added_8">Added<a class="headerlink" href="#added_8" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Mark the module as no-GIL, which enables free-threaded Python (can be built from source, not provided so far
   via
@@ -2946,7 +2970,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
   <code>cast: bool = False</code> argument. We plan to change the default value to <code>True</code> in a future 0.x version.
   https://github.com/light-curve/light-curve-python/issues/509 https://github.com/light-curve/light-curve-python/pull/512</li>
 </ul>
-<h3 id="changed_8">Changed<a class="headerlink" href="#changed_8" title="Permanent link">&para;</a></h3>
+<h3 id="changed_9">Changed<a class="headerlink" href="#changed_9" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>PyPI wheels change</strong>: bump Musl PyPI wheels compatibility from musllinux 1.1 to
   1.2 https://github.com/light-curve/light-curve-python/pull/503</li>
@@ -2970,7 +2994,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 <h2 id="0101-2025-03-25-deleted">[0.10.1] 2025-03-25 (DELETED)<a class="headerlink" href="#0101-2025-03-25-deleted" title="Permanent link">&para;</a></h2>
 <p>Release is deleted from PyPI and has never been released on conda-forge.
 The reason is a bug fixed in 0.10.2.</p>
-<h3 id="changed_9">Changed<a class="headerlink" href="#changed_9" title="Permanent link">&para;</a></h3>
+<h3 id="changed_10">Changed<a class="headerlink" href="#changed_10" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Experimental Feature Breaking</strong>: change parameter limits for
   Rainbow https://github.com/light-curve/light-curve-python/pull/494</li>
@@ -2986,7 +3010,7 @@ The reason is a bug fixed in 0.10.2.</p>
   inputs https://github.com/light-curve/light-curve-python/issues/492 https://github.com/light-curve/light-curve-python/pull/493</li>
 </ul>
 <h2 id="0100-2025-01-07">[0.10.0] 2025-01-07<a class="headerlink" href="#0100-2025-01-07" title="Permanent link">&para;</a></h2>
-<h3 id="changed_10">Changed<a class="headerlink" href="#changed_10" title="Permanent link">&para;</a></h3>
+<h3 id="changed_11">Changed<a class="headerlink" href="#changed_11" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Breaking</strong> macOS x86_64 binary wheel now requires macOS 13 instead of
   12 https://github.com/light-curve/light-curve-python/issues/437 https://github.com/light-curve/light-curve-python/pull/446</li>
@@ -3006,18 +3030,18 @@ The reason is a bug fixed in 0.10.2.</p>
   v1.8.x https://github.com/light-curve/light-curve-python/pull/467</li>
 </ul>
 <h2 id="096-2024-10-01">[0.9.6] 2024-10-01<a class="headerlink" href="#096-2024-10-01" title="Permanent link">&para;</a></h2>
-<h3 id="changed_11">Changed<a class="headerlink" href="#changed_11" title="Permanent link">&para;</a></h3>
+<h3 id="changed_12">Changed<a class="headerlink" href="#changed_12" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>LinexpBolometricTerm</code> for <code>Rainbow</code> changed to clip negative values to
   zero https://github.com/light-curve/light-curve-python/pull/430</li>
 </ul>
 <h2 id="095-2024-09-20">[0.9.5] 2024-09-20<a class="headerlink" href="#095-2024-09-20" title="Permanent link">&para;</a></h2>
-<h3 id="added_8">Added<a class="headerlink" href="#added_8" title="Permanent link">&para;</a></h3>
+<h3 id="added_9">Added<a class="headerlink" href="#added_9" title="Permanent link">&para;</a></h3>
 <ul>
 <li>More variants of temperature and bollometric functions for
   <code>RainbowFit</code> https://github.com/light-curve/light-curve-python/pull/411</li>
 </ul>
-<h3 id="changed_12">Changed<a class="headerlink" href="#changed_12" title="Permanent link">&para;</a></h3>
+<h3 id="changed_13">Changed<a class="headerlink" href="#changed_13" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Change boundary conditions for <code>RainbowFit</code> https://github.com/light-curve/light-curve-python/pull/414</li>
 </ul>
@@ -3026,7 +3050,7 @@ The reason is a bug fixed in 0.10.2.</p>
 <li>Package import doesn't fail if <code>scipy</code> is missed https://github.com/light-curve/light-curve-python/pull/422</li>
 </ul>
 <h2 id="094-2024-09-11">[0.9.4] 2024-09-11<a class="headerlink" href="#094-2024-09-11" title="Permanent link">&para;</a></h2>
-<h3 id="changed_13">Changed<a class="headerlink" href="#changed_13" title="Permanent link">&para;</a></h3>
+<h3 id="changed_14">Changed<a class="headerlink" href="#changed_14" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Experimental Rainbow fit features use maximum likelihood cost function instead of least
   squares https://github.com/light-curve/light-curve-python/pull/407</li>
@@ -3038,7 +3062,7 @@ The reason is a bug fixed in 0.10.2.</p>
   compatibility https://github.com/light-curve/light-curve-python/pull/383</li>
 </ul>
 <h2 id="092-2024-06-05">[0.9.2] 2024-06-05<a class="headerlink" href="#092-2024-06-05" title="Permanent link">&para;</a></h2>
-<h3 id="added_9">Added<a class="headerlink" href="#added_9" title="Permanent link">&para;</a></h3>
+<h3 id="added_10">Added<a class="headerlink" href="#added_10" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>Roms</code> feature implemented in
   Rust https://github.com/light-curve/light-curve-python/pull/362 https://github.com/light-curve/light-curve-python/issues/356</li>
@@ -3051,11 +3075,11 @@ The reason is a bug fixed in 0.10.2.</p>
   arm64. https://github.com/light-curve/light-curve-python/issues/376 https://github.com/light-curve/light-curve-python/pull/378</li>
 </ul>
 <h2 id="091-2024-04-23">[0.9.1] 2024-04-23<a class="headerlink" href="#091-2024-04-23" title="Permanent link">&para;</a></h2>
-<h3 id="added_10">Added<a class="headerlink" href="#added_10" title="Permanent link">&para;</a></h3>
+<h3 id="added_11">Added<a class="headerlink" href="#added_11" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>PeakToPeakVar</code> experimental feature https://github.com/light-curve/light-curve-python/pull/332</li>
 </ul>
-<h3 id="changed_14">Changed<a class="headerlink" href="#changed_14" title="Permanent link">&para;</a></h3>
+<h3 id="changed_15">Changed<a class="headerlink" href="#changed_15" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Bump <code>pyO3</code> to 0.21</li>
 <li>Bump <code>rust-numpy</code> to 0.21</li>
@@ -3073,14 +3097,14 @@ The reason is a bug fixed in 0.10.2.</p>
   wheels) https://github.com/light-curve/light-curve-python/issues/343 https://github.com/light-curve/light-curve-python/pull/344</li>
 </ul>
 <h2 id="090-2024-03-06">[0.9.0] 2024-03-06<a class="headerlink" href="#090-2024-03-06" title="Permanent link">&para;</a></h2>
-<h3 id="added_11">Added<a class="headerlink" href="#added_11" title="Permanent link">&para;</a></h3>
+<h3 id="added_12">Added<a class="headerlink" href="#added_12" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>Roms</code> (robust median statistics) experimental feature, a variability index based on the deviation of
   observations
   from the median. https://github.com/light-curve/light-curve-python/pull/315 Thanks @GaluTi for their first
   contribution</li>
 </ul>
-<h3 id="changed_15">Changed<a class="headerlink" href="#changed_15" title="Permanent link">&para;</a></h3>
+<h3 id="changed_16">Changed<a class="headerlink" href="#changed_16" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Breaking</strong> <code>RainbowFit</code> is significantly refactored to make it more flexible for usage of different
   bolometric and
@@ -3106,7 +3130,7 @@ The reason is a bug fixed in 0.10.2.</p>
 <h3 id="security_2">Security<a class="headerlink" href="#security_2" title="Permanent link">&para;</a></h3>
 <p>--</p>
 <h2 id="082-2024-02-27">[0.8.2] 2024-02-27<a class="headerlink" href="#082-2024-02-27" title="Permanent link">&para;</a></h2>
-<h3 id="added_12">Added<a class="headerlink" href="#added_12" title="Permanent link">&para;</a></h3>
+<h3 id="added_13">Added<a class="headerlink" href="#added_13" title="Permanent link">&para;</a></h3>
 <ul>
 <li>New flavour of <code>RainbowFit</code>: <code>RainbowSymmetricFit</code> which will replace both <code>RainbowFit</code> and
   <code>RainbowRisingFit</code> in the
@@ -3115,7 +3139,7 @@ The reason is a bug fixed in 0.10.2.</p>
 <li>New cargo build-time feature, <code>mimalloc</code>, it is default feature now. When activated, it gives up to 2.9x of
   performance boost for some "fast" features. https://github.com/light-curve/light-curve-python/pull/302</li>
 </ul>
-<h3 id="changed_16">Changed<a class="headerlink" href="#changed_16" title="Permanent link">&para;</a></h3>
+<h3 id="changed_17">Changed<a class="headerlink" href="#changed_17" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Refactoring of rainbow features, it reduces code duplication and makes it easier to add new variants like
   <code>RainbowFit</code>
@@ -3135,13 +3159,13 @@ The reason is a bug fixed in 0.10.2.</p>
   comparing to previous versions. https://github.com/light-curve/light-curve-python/pull/293</li>
 </ul>
 <h2 id="081-2023-11-30">[0.8.1] 2023-11-30<a class="headerlink" href="#081-2023-11-30" title="Permanent link">&para;</a></h2>
-<h3 id="added_13">Added<a class="headerlink" href="#added_13" title="Permanent link">&para;</a></h3>
+<h3 id="added_14">Added<a class="headerlink" href="#added_14" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>RainbowRisingFit</code> experimental feature, https://github.com/light-curve/light-curve-python/pull/278
   by <a href="https://github.com/erusseil">@erusseil</a></li>
 </ul>
 <h2 id="080-2023-09-20">[0.8.0] 2023-09-20<a class="headerlink" href="#080-2023-09-20" title="Permanent link">&para;</a></h2>
-<h3 id="added_14">Added<a class="headerlink" href="#added_14" title="Permanent link">&para;</a></h3>
+<h3 id="added_15">Added<a class="headerlink" href="#added_15" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Breaking change in experimental features</strong>: Multiband support is introduced for features implemented in
   Python. It
@@ -3154,7 +3178,7 @@ The reason is a bug fixed in 0.10.2.</p>
 <li>Optional <code>iminuit&gt;=2,&lt;3</code> Python dependency (included into <code>[full]</code>) for <code>RainbowFit</code> feature</li>
 <li>Add <code>once_cell</code> v1 dependency</li>
 </ul>
-<h3 id="changed_17">Changed<a class="headerlink" href="#changed_17" title="Permanent link">&para;</a></h3>
+<h3 id="changed_18">Changed<a class="headerlink" href="#changed_18" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Breaking change in experimental features</strong> <code>scipy</code> dependency is now optional for experimental features
   implemented
@@ -3176,7 +3200,7 @@ The reason is a bug fixed in 0.10.2.</p>
 <li>Bump <code>thiserror</code> 1.0.41 -&gt; 1.0.48 https://github.com/light-curve/light-curve-python/pull/242</li>
 </ul>
 <h2 id="073-2023-07-06">[0.7.3] 2023-07-06<a class="headerlink" href="#073-2023-07-06" title="Permanent link">&para;</a></h2>
-<h3 id="added_15">Added<a class="headerlink" href="#added_15" title="Permanent link">&para;</a></h3>
+<h3 id="added_16">Added<a class="headerlink" href="#added_16" title="Permanent link">&para;</a></h3>
 <ul>
 <li>All Rust features got <code>.to_json()</code> method to serialize their state to JSON
   string. https://github.com/light-curve/light-curve-python/pull/226</li>
@@ -3190,7 +3214,7 @@ The reason is a bug fixed in 0.10.2.</p>
   versions. See <a href="https://www.python.org/dev/peps/pep-0384/">PEP 384</a> for
   details. https://github.com/light-curve/light-curve-python/issues/79</li>
 </ul>
-<h3 id="changed_18">Changed<a class="headerlink" href="#changed_18" title="Permanent link">&para;</a></h3>
+<h3 id="changed_19">Changed<a class="headerlink" href="#changed_19" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Build breaking</strong>: the only Python build requirement <code>maturin</code> updated from v0.14.x to
   v1.0 https://github.com/light-curve/light-curve-python/pull/216 https://github.com/light-curve/light-curve-python/pull/215</li>
@@ -3205,7 +3229,7 @@ The reason is a bug fixed in 0.10.2.</p>
   Recent <code>maturin</code> update allowed us to specify it via <code>pyproject.toml</code></li>
 </ul>
 <h2 id="072-2023-04-12">[0.7.2] 2023-04-12<a class="headerlink" href="#072-2023-04-12" title="Permanent link">&para;</a></h2>
-<h3 id="added_16">Added<a class="headerlink" href="#added_16" title="Permanent link">&para;</a></h3>
+<h3 id="added_17">Added<a class="headerlink" href="#added_17" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Feature transformations via <code>transform</code> constructor keyword. For most of the features it could accept string
   with a
@@ -3220,7 +3244,7 @@ The reason is a bug fixed in 0.10.2.</p>
 <li>Development: now project has extras for testing (<code>test</code>) and
   development (<code>dev</code>) https://github.com/light-curve/light-curve-python/pull/197</li>
 </ul>
-<h3 id="changed_19">Changed<a class="headerlink" href="#changed_19" title="Permanent link">&para;</a></h3>
+<h3 id="changed_20">Changed<a class="headerlink" href="#changed_20" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Build breaking</strong>: minimum supported Rust version (MSRV) is bump from 1.60 to 1.62</li>
 <li>Bump <code>light-curve-feature</code> 0.5.4 -&gt; 0.5.5</li>
@@ -3258,7 +3282,7 @@ The reason is a bug fixed in 0.10.2.</p>
   length</li>
 </ul>
 <h2 id="070-2023-03-16">[0.7.0] 2023-03-16<a class="headerlink" href="#070-2023-03-16" title="Permanent link">&para;</a></h2>
-<h3 id="added_17">Added<a class="headerlink" href="#added_17" title="Permanent link">&para;</a></h3>
+<h3 id="added_18">Added<a class="headerlink" href="#added_18" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>BazinFit</code> and <code>VillarFit</code> have got <code>ceres</code> and <code>mcmc-ceres</code> algorithms
   using <a href="http://ceres-solver.org">Ceres Solver</a>
@@ -3270,7 +3294,7 @@ The reason is a bug fixed in 0.10.2.</p>
   enabled for
   cibuildwheel in <code>pyproject.toml</code>)</li>
 </ul>
-<h3 id="changed_20">Changed<a class="headerlink" href="#changed_20" title="Permanent link">&para;</a></h3>
+<h3 id="changed_21">Changed<a class="headerlink" href="#changed_21" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>API breaking:</strong> Features' <code>__call__()</code> signature changed to make <code>sorted=None</code>, <code>check=True</code> and
   <code>fill_value=None</code>
@@ -3321,7 +3345,7 @@ The reason is a bug fixed in 0.10.2.</p>
   100ns. https://github.com/light-curve/light-curve-python/pull/174</li>
 </ul>
 <h2 id="064-2023-01-19">[0.6.4] 2023-01-19<a class="headerlink" href="#064-2023-01-19" title="Permanent link">&para;</a></h2>
-<h3 id="added_18">Added<a class="headerlink" href="#added_18" title="Permanent link">&para;</a></h3>
+<h3 id="added_19">Added<a class="headerlink" href="#added_19" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Initial <code>copy</code> and <code>pickle</code> (minimum protocol version is 2) support for feature extractors
   and
@@ -3331,7 +3355,7 @@ The reason is a bug fixed in 0.10.2.</p>
   binary format, but it could be useful in the future having a way to inspect Rust structures from
   Python https://github.com/light-curve/light-curve-python/pull/145</li>
 </ul>
-<h3 id="changed_21">Changed<a class="headerlink" href="#changed_21" title="Permanent link">&para;</a></h3>
+<h3 id="changed_22">Changed<a class="headerlink" href="#changed_22" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Build environment: minimum support Rust version (MSRV) is bumped 1.57 -&gt; 1.60</li>
 <li>Bump <code>light-curve-dmdt</code> 0.6.0 -&gt; 0.7.1</li>
@@ -3348,7 +3372,7 @@ The reason is a bug fixed in 0.10.2.</p>
 <li><code>OtsuSplit</code> implementation in
   Rust https://github.com/light-curve/light-curve-python/issues/120 https://github.com/light-curve/light-curve-python/pull/123</li>
 </ul>
-<h3 id="changed_22">Changed<a class="headerlink" href="#changed_22" title="Permanent link">&para;</a></h3>
+<h3 id="changed_23">Changed<a class="headerlink" href="#changed_23" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>light-curve-feature</code> 0.5.0 -&gt; 0.5.2 https://github.com/light-curve/light-curve-python/pull/123</li>
 <li><code>light-curve-dmdt</code> 0.5.0 -&gt; 0.6.0</li>
@@ -3375,11 +3399,11 @@ The reason is a bug fixed in 0.10.2.</p>
 <p>— fix <code>threshold</code> method in Python according to Rust
 implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <h2 id="061-2022-11-01">[0.6.1] 2022-11-01<a class="headerlink" href="#061-2022-11-01" title="Permanent link">&para;</a></h2>
-<h3 id="added_19">Added<a class="headerlink" href="#added_19" title="Permanent link">&para;</a></h3>
+<h3 id="added_20">Added<a class="headerlink" href="#added_20" title="Permanent link">&para;</a></h3>
 <ul>
 <li>CI: Python 3.11 binary wheels</li>
 </ul>
-<h3 id="changed_23">Changed<a class="headerlink" href="#changed_23" title="Permanent link">&para;</a></h3>
+<h3 id="changed_24">Changed<a class="headerlink" href="#changed_24" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>const_format</code> 0.2.25 -&gt; 0.2.30</li>
 <li><code>itertools</code> 0.10.3 -&gt; 0.10.5</li>
@@ -3402,7 +3426,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <h3 id="security_3">Security<a class="headerlink" href="#security_3" title="Permanent link">&para;</a></h3>
 <p>—</p>
 <h2 id="060-2022-07-04">[0.6.0] 2022-07-04<a class="headerlink" href="#060-2022-07-04" title="Permanent link">&para;</a></h2>
-<h3 id="changed_24">Changed<a class="headerlink" href="#changed_24" title="Permanent link">&para;</a></h3>
+<h3 id="changed_25">Changed<a class="headerlink" href="#changed_25" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Breaking:</strong> drop Python 3.6 support</li>
 <li><strong>Breaking:</strong> minimum supported Rust version (MSRV) 1.56 -&gt; 1.57</li>
@@ -3411,7 +3435,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li><code>py03</code> 0.15.1 -&gt; 0.16.3</li>
 </ul>
 <h2 id="059-2022-06-15">[0.5.9] 2022-06-15<a class="headerlink" href="#059-2022-06-15" title="Permanent link">&para;</a></h2>
-<h3 id="added_20">Added<a class="headerlink" href="#added_20" title="Permanent link">&para;</a></h3>
+<h3 id="added_21">Added<a class="headerlink" href="#added_21" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>macro_const</code> 0.1.0 dependency</li>
 </ul>
@@ -3420,7 +3444,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>docstring for <code>many</code> method is added to each Rust feature class</li>
 </ul>
 <h2 id="058-2022-06-14">[0.5.8] 2022-06-14<a class="headerlink" href="#058-2022-06-14" title="Permanent link">&para;</a></h2>
-<h3 id="changed_25">Changed<a class="headerlink" href="#changed_25" title="Permanent link">&para;</a></h3>
+<h3 id="changed_26">Changed<a class="headerlink" href="#changed_26" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>light-curve-feature</code> 0.4.5 -&gt; 0.4.6</li>
 </ul>
@@ -3429,11 +3453,11 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>Minimum supported Rust version 1.56 wasn't actually supported, <code>light-curve-feature</code> upgrade fixed it</li>
 </ul>
 <h2 id="057-2022-06-10">[0.5.7] 2022-06-10<a class="headerlink" href="#057-2022-06-10" title="Permanent link">&para;</a></h2>
-<h3 id="added_21">Added<a class="headerlink" href="#added_21" title="Permanent link">&para;</a></h3>
+<h3 id="added_22">Added<a class="headerlink" href="#added_22" title="Permanent link">&para;</a></h3>
 <ul>
 <li>CI: build Windows w/o GSL</li>
 </ul>
-<h3 id="changed_26">Changed<a class="headerlink" href="#changed_26" title="Permanent link">&para;</a></h3>
+<h3 id="changed_27">Changed<a class="headerlink" href="#changed_27" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>light-curve-feature</code> 0.4.4 -&gt; 0.4.5</li>
 </ul>
@@ -3442,7 +3466,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li><code>light-curve-feature</code> update fixes <code>NaN value of lnprob</code> problem with MCMC fit in <code>{Bazin,Villar}Fit</code></li>
 </ul>
 <h2 id="056-2022-06-06">[0.5.6] 2022-06-06<a class="headerlink" href="#056-2022-06-06" title="Permanent link">&para;</a></h2>
-<h3 id="changed_27">Changed<a class="headerlink" href="#changed_27" title="Permanent link">&para;</a></h3>
+<h3 id="changed_28">Changed<a class="headerlink" href="#changed_28" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Infrastructure: <a href="https://cibuildwheel.readthedocs.io/en/stable/">cibuildweel</a> for package publishing</li>
 <li><code>light-curve-feature</code> 0.4.1 -&gt; 0.4.4</li>
@@ -3458,19 +3482,19 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>Benchmark and test for <code>MagnitudePercentageRatio</code></li>
 </ul>
 <h2 id="055-2022-04-05">[0.5.5] 2022-04-05<a class="headerlink" href="#055-2022-04-05" title="Permanent link">&para;</a></h2>
-<h3 id="added_22">Added<a class="headerlink" href="#added_22" title="Permanent link">&para;</a></h3>
+<h3 id="added_23">Added<a class="headerlink" href="#added_23" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Pure-Python implemented features <code>FluxNNotDetBeforeFd</code> and <code>MagnitudeNNotDetBeforeFd</code></li>
 <li>Pure-Python implemented <code>OtsuSplit.threshold</code> method</li>
 </ul>
-<h3 id="changed_28">Changed<a class="headerlink" href="#changed_28" title="Permanent link">&para;</a></h3>
+<h3 id="changed_29">Changed<a class="headerlink" href="#changed_29" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>rust-numpy</code> 0.15.0 -&gt; 0.15.1</li>
 <li><code>rand</code> 0.8.4 -&gt; 0.8.5</li>
 <li><code>enumflag2</code> 0.7.3 -&gt; 0.7.4</li>
 </ul>
 <h2 id="054-2021-12-20">[0.5.4] 2021-12-20<a class="headerlink" href="#054-2021-12-20" title="Permanent link">&para;</a></h2>
-<h3 id="added_23">Added<a class="headerlink" href="#added_23" title="Permanent link">&para;</a></h3>
+<h3 id="added_24">Added<a class="headerlink" href="#added_24" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>ln_prior</code> submodule with <code>LnPrior1D</code> class and stand-alone functions to construct its instances</li>
 <li><code>ln_prior</code> argument for <code>BazinFit</code> and <code>VillarFit</code> constructors which can be one of: <code>None</code>, <code>str</code>
@@ -3480,7 +3504,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
   more
   reproducible</li>
 </ul>
-<h3 id="changed_29">Changed<a class="headerlink" href="#changed_29" title="Permanent link">&para;</a></h3>
+<h3 id="changed_30">Changed<a class="headerlink" href="#changed_30" title="Permanent link">&para;</a></h3>
 <ul>
 <li>The project repository was split from Rust crates and moved
   into <a href="https://gituhb.com/light-curve/light-curve-python">https://gituhb.com/light-curve/light-curve-python</a></li>
@@ -3488,11 +3512,11 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li><code>light-curve-dmdt</code> version 0.5.0</li>
 </ul>
 <h2 id="053-2021-12-16">[0.5.3] 2021-12-16<a class="headerlink" href="#053-2021-12-16" title="Permanent link">&para;</a></h2>
-<h3 id="added_24">Added<a class="headerlink" href="#added_24" title="Permanent link">&para;</a></h3>
+<h3 id="added_25">Added<a class="headerlink" href="#added_25" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Python 3.10 support and binary wheels for supported platforms</li>
 </ul>
-<h3 id="changed_30">Changed<a class="headerlink" href="#changed_30" title="Permanent link">&para;</a></h3>
+<h3 id="changed_31">Changed<a class="headerlink" href="#changed_31" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Update <code>pyo3</code> to 0.15.1 and <code>rust-numpy</code> to 0.15.0</li>
 </ul>
@@ -3502,18 +3526,18 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>Fix implementation of <code>OtsuSplit</code>, see <a href="https://github.com/light-curve/light-curve/issues/150">issue #150</a></li>
 </ul>
 <h2 id="051-2021-12-15">[0.5.1] 2021-12-15<a class="headerlink" href="#051-2021-12-15" title="Permanent link">&para;</a></h2>
-<h3 id="added_25">Added<a class="headerlink" href="#added_25" title="Permanent link">&para;</a></h3>
+<h3 id="added_26">Added<a class="headerlink" href="#added_26" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>init</code> and <code>bounds</code> arguments of <code>BazinFit</code> and <code>VillarFit</code> constructors</li>
 </ul>
 <h2 id="050-2021-12-14">[0.5.0] 2021-12-14<a class="headerlink" href="#050-2021-12-14" title="Permanent link">&para;</a></h2>
-<h3 id="added_26">Added<a class="headerlink" href="#added_26" title="Permanent link">&para;</a></h3>
+<h3 id="added_27">Added<a class="headerlink" href="#added_27" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>check: bool = True</code> keyword argument for <code>__call__</code> and <code>many</code> methods of feature classes. It coulb be used
   to check
   if input arrays are valid</li>
 </ul>
-<h3 id="changed_31">Changed<a class="headerlink" href="#changed_31" title="Permanent link">&para;</a></h3>
+<h3 id="changed_32">Changed<a class="headerlink" href="#changed_32" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>gsl</code> is a default Cargo feature now, which means that GSL must be installed to build this package by
   standard Python
@@ -3532,7 +3556,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>Fix implementation of <code>OtsuSplit</code>, see <a href="https://github.com/light-curve/light-curve/issues/150">issue #150</a></li>
 </ul>
 <h2 id="040-2021-11-26">[0.4.0] 2021-11-26<a class="headerlink" href="#040-2021-11-26" title="Permanent link">&para;</a></h2>
-<h3 id="added_27">Added<a class="headerlink" href="#added_27" title="Permanent link">&para;</a></h3>
+<h3 id="added_28">Added<a class="headerlink" href="#added_28" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Pure-Python implemented <code>OtsuSplit</code> feature extractor (experimental)</li>
 <li>Python snippets in <code>README.md</code> are tested, this requires <code>pytest-markdown</code></li>
@@ -3540,7 +3564,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>New benchmarks to compare pure-Python and Rust implementations performance</li>
 <li>Publish Linux packages for <code>aarch64</code> and <code>ppc64le</code></li>
 </ul>
-<h3 id="changed_32">Changed<a class="headerlink" href="#changed_32" title="Permanent link">&para;</a></h3>
+<h3 id="changed_33">Changed<a class="headerlink" href="#changed_33" title="Permanent link">&para;</a></h3>
 <ul>
 <li>The Python package is renamed to <code>light-curve</code>, <code>light-curve-python</code> still exists as an alias</li>
 <li>Pure Python implementation of the most of the features are added, now Rust-implemented features live
@@ -3556,7 +3580,7 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>The Rust implemented classes <code>.__module__</code> was <code>buitins</code>, now it is <code>light_curve.light_curve_ext</code></li>
 </ul>
 <h2 id="035-2021-10-27">[0.3.5] 2021-10-27<a class="headerlink" href="#035-2021-10-27" title="Permanent link">&para;</a></h2>
-<h3 id="changed_33">Changed<a class="headerlink" href="#changed_33" title="Permanent link">&para;</a></h3>
+<h3 id="changed_34">Changed<a class="headerlink" href="#changed_34" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Rust edition 2021</li>
 <li>Minimum supported Rust version is 1.56</li>
@@ -3568,13 +3592,13 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li>An exception shouldn't be raised for the case of small time-series length and non-<code>None</code> <code>fill_value</code></li>
 </ul>
 <h2 id="033-2021-10-14">[0.3.3] 2021-10-14<a class="headerlink" href="#033-2021-10-14" title="Permanent link">&para;</a></h2>
-<h3 id="added_28">Added<a class="headerlink" href="#added_28" title="Permanent link">&para;</a></h3>
+<h3 id="added_29">Added<a class="headerlink" href="#added_29" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Support <code>dtype=np.float32</code> for feature extractors</li>
 <li><code>_FeatureEvaluator.many(lcs)</code> method for parallel execution</li>
 </ul>
 <h2 id="032-2021-08-30">[0.3.2] 2021-08-30<a class="headerlink" href="#032-2021-08-30" title="Permanent link">&para;</a></h2>
-<h3 id="changed_34">Changed<a class="headerlink" href="#changed_34" title="Permanent link">&para;</a></h3>
+<h3 id="changed_35">Changed<a class="headerlink" href="#changed_35" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Update <code>light-curve-feature</code> to <code>0.3.3</code></li>
 <li><code>__call__</code> docs for features</li>
@@ -3584,11 +3608,11 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li><code>light-curve-feature</code> 0.3.3 fixes wrong <code>VillarFit</code> equation</li>
 </ul>
 <h2 id="031-2021-08-16">[0.3.1] 2021-08-16<a class="headerlink" href="#031-2021-08-16" title="Permanent link">&para;</a></h2>
-<h3 id="added_29">Added<a class="headerlink" href="#added_29" title="Permanent link">&para;</a></h3>
+<h3 id="added_30">Added<a class="headerlink" href="#added_30" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>mcmc_niter</code> and <code>lmsder_niter</code> parameters of <code>*Fit</code> features</li>
 </ul>
-<h3 id="changed_35">Changed<a class="headerlink" href="#changed_35" title="Permanent link">&para;</a></h3>
+<h3 id="changed_36">Changed<a class="headerlink" href="#changed_36" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Amd64 PyPI packages are manylinux2014</li>
 <li>PyPI releases compiled with <code>gsl</code> feature enabled</li>
@@ -3602,13 +3626,13 @@ implementation https://github.com/light-curve/light-curve-python/pull/123</p>
 <li><code>*Fit</code> <code>algorithm</code> parameter was marked as optional in the docstrings</li>
 </ul>
 <h2 id="030-2021-08-10">[0.3.0] 2021-08-10<a class="headerlink" href="#030-2021-08-10" title="Permanent link">&para;</a></h2>
-<h3 id="added_30">Added<a class="headerlink" href="#added_30" title="Permanent link">&para;</a></h3>
+<h3 id="added_31">Added<a class="headerlink" href="#added_31" title="Permanent link">&para;</a></h3>
 <ul>
 <li>This <code>CHANGELOG.md</code> file</li>
 <li><code>BazinFit</code> is enabled</li>
 <li><code>VillarFit</code> feature</li>
 </ul>
-<h3 id="changed_36">Changed<a class="headerlink" href="#changed_36" title="Permanent link">&para;</a></h3>
+<h3 id="changed_37">Changed<a class="headerlink" href="#changed_37" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Remove <code>DmDt.point_from_columnar</code> and <code>DmDt.gausses_from_columnar</code></li>
 <li>Update <code>ndarray</code> to 0.15.3 and <code>light-curve-dmdt</code> to 0.4.0</li>
