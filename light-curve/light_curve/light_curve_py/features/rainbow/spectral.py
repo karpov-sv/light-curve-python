@@ -267,7 +267,7 @@ class FreeBlanketedPlanckSpectralTerm(BaseSpectralTerm):
     free_depth : bool, optional
         If False (default) the optical depth ``I`` is fixed at ``_intensity`` (a hard blue
         blackout; the only fit parameter is ``blanket_scale``, carrying a prior
-        ``N(_scale_prior_mean_fixed, _scale_prior_sigma_fixed)`` anchored at the *sensitivity
+        ``N(scale_prior_mean_aa, scale_prior_sigma_aa)`` anchored at the *sensitivity
         edge*, which parks unblanketed sources at the limit below which the model is Planck
         in every band, rather than in the degenerate blackbody-mimicking twin at ~650 A).
         If True, the depth becomes a
@@ -277,7 +277,7 @@ class FreeBlanketedPlanckSpectralTerm(BaseSpectralTerm):
         blackout, avoiding the temperature overheating that a fixed full depth induces.
 
         ``blanket_depth`` is **anchored at a fixed reference wavelength**: it is the optical
-        depth ``tau`` at ``lambda_ref = _lam_ref_cm`` (~u band), not the ``lambda -> 0``
+        depth ``tau`` at ``lambda_ref = lam_ref_aa`` (~u band), not the ``lambda -> 0``
         extrapolation ``I``. Anchoring at a data-relevant wavelength makes the depth a
         directly observable quantity (the blue-band suppression is ``1 - exp(-blanket_depth)``
         for an edge near the bands) and removes the long ``(scale, depth)`` ridge of the
@@ -292,6 +292,16 @@ class FreeBlanketedPlanckSpectralTerm(BaseSpectralTerm):
         keeps them out of the measured distribution (and makes ``blanket_scale`` itself a
         thermal/blanketed discriminant) — while the wide prior is overridden wherever the
         data actually constrain the edge.
+    lam_ref_aa : float, optional
+        Reference wavelength in angstrom, defaulting to the LSST *u* effective wavelength. It
+        anchors ``blanket_depth`` in free-depth mode and must sit at or blueward of the bluest
+        band in use (see the class body for why). Lower it for a filter set with bluer coverage.
+    scale_prior_mean_aa, scale_prior_sigma_aa : float, optional
+        Gaussian prior on ``blanket_scale`` in fixed-depth mode, in angstrom. The defaults are
+        tuned for LSST *ugrizy*; the mean marks the sensitivity edge, roughly
+        ``lam_blue / 9.2``, below which the model is a plain Planck function in every band. The
+        width is set by how much chi2 the degenerate solution buys and is *not* a wavelength, so
+        rescaling it with the filter set is usually wrong. Ignored when ``free_depth`` is True.
 
     Notes
     -----
@@ -301,16 +311,21 @@ class FreeBlanketedPlanckSpectralTerm(BaseSpectralTerm):
     """
 
     free_depth: bool = False
-
-    _intensity = 100.0  # fixed optical depth used when ``free_depth`` is False (hard blackout)
-    # Reference wavelength anchoring ``blanket_depth`` in free_depth mode: the depth is the
-    # optical depth at this wavelength, i.e. a directly observable blue suppression. It MUST
-    # sit at (or blueward of) the bluest band: if any band were blueward of the anchor, an
+    # Reference wavelength (angstrom) anchoring ``blanket_depth`` in free_depth mode: the depth
+    # is the optical depth at this wavelength, i.e. a directly observable blue suppression. It
+    # MUST sit at (or blueward of) the bluest band: if any band were blueward of the anchor, an
     # ultra-sharp edge squeezed between them would amplify that band's optical depth above
     # ``blanket_depth`` (tau scales as e^{(lam_ref - lam)/lam_s}), letting the fit buy blue
     # suppression while dodging the depth prior. Default is the LSST u effective wavelength;
-    # adjust for filter sets with bluer coverage.
-    _lam_ref_cm = 3671e-8
+    # lower it for filter sets with bluer coverage.
+    lam_ref_aa: float = 3671.0
+    # Fixed-depth scale prior (angstrom), see the block below for how these two are set. They
+    # are wavelength-dependent, so a filter set that is not LSST-like may want its own; the
+    # mean should stay at or below the bluest band's sensitivity edge, ~``lam_blue / 9.2``.
+    scale_prior_mean_aa: float = 500.0
+    scale_prior_sigma_aa: float = 200.0
+
+    _intensity = 100.0  # fixed optical depth used when ``free_depth`` is False (hard blackout)
     # Weak N(0, sigma) prior anchoring blanket_depth (= tau at _lam_ref_cm) to 0 (no
     # blanketing). This width is the chi2-vs-temperature-fidelity dial on heavily blanketed
     # sources (mallorn SN Ia, median): 3.0 -> rchi2 0.95 / T 34% hot; 1.5 -> 0.99 / 27%;
@@ -354,10 +369,13 @@ class FreeBlanketedPlanckSpectralTerm(BaseSpectralTerm):
     # Tighten sigma toward 150 when clean thermal nulls matter more than SN completeness;
     # the leak/completeness trade is an information limit (the faintest quartile of SNe gains
     # as little chi2 as the strongest tenth of thermal sources), so no anchor escapes it.
-    # NB these two constants apply to fixed-depth mode only; the free-depth branch keeps the
-    # low anchor above, where the depth parameter -- not the scale -- carries the null.
-    _scale_prior_mean_fixed = 500.0
-    _scale_prior_sigma_fixed = 200.0
+    # NB ``scale_prior_mean_aa`` / ``scale_prior_sigma_aa`` apply to fixed-depth mode only; the
+    # free-depth branch keeps the low anchor above, where the depth parameter -- not the scale --
+    # carries the null.
+
+    @property
+    def _lam_ref_cm(self):
+        return self.lam_ref_aa * 1e-8
 
     def parameter_names(self):
         return ["blanket_scale", "blanket_depth"] if self.free_depth else ["blanket_scale"]
@@ -418,8 +436,8 @@ class FreeBlanketedPlanckSpectralTerm(BaseSpectralTerm):
                 "blanket_scale": (cls._scale_prior_mean, cls._scale_prior_sigma),
             }
         # Fixed depth: scale prior anchored at the sensitivity edge, tight enough to tip
-        # unblanketed sources out of the degenerate twin basin (see _scale_prior_mean_fixed).
-        return {"blanket_scale": (cls._scale_prior_mean_fixed, cls._scale_prior_sigma_fixed)}
+        # unblanketed sources out of the degenerate twin basin (see scale_prior_mean_aa).
+        return {"blanket_scale": (self.scale_prior_mean_aa, self.scale_prior_sigma_aa)}
 
     def dvalue_dT(self, wave_cm, T, *params):
         """∂(spec)/∂T w.r.t. the instantaneous temperature only (the edge is T-independent)."""
@@ -642,12 +660,27 @@ class SharpBlackBodySpectralTerm(BaseSpectralTerm):
     ``sharpness`` is a fixed design constant, not a fit parameter (4-6 perform nearly
     identically on mallorn; sub-1 values reproduce the modified-blackbody behavior,
     including its temperature degeneracy).
+
+    Parameters
+    ----------
+    sharpness : float, optional
+        Exponent of the power-law opacity; how tightly the suppression is confined to the blue.
+    lam_ref_aa : float, optional
+        Reference wavelength in angstrom, defaulting to the LSST *u* effective wavelength. Set it
+        to the bluest band of the filter set in use, so that ``beta`` keeps its reading as that
+        band's optical depth.
     """
 
     sharpness: float = 6.0
+    # Reference wavelength (angstrom); ``beta`` is the optical depth *at* it, so this should sit
+    # at the bluest band of the filter set in use. Default is the LSST u effective wavelength.
+    lam_ref_aa: float = 3671.0
 
-    _lam_ref_cm = 3671e-8  # bluest (u) band: beta is the u-band optical depth
     _prior_sigma = 0.75
+
+    @property
+    def _lam_ref_cm(self):
+        return self.lam_ref_aa * 1e-8
 
     def parameter_names(self):
         return ["beta"]

@@ -16,13 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a free observer-frame edge absorbs both the rest-frame break and the unknown `z` into one
   fitted number. `FreeBlanketedPlanckSpectralTerm(free_depth=True)` additionally frees the
   optical depth, anchored at a fixed reference wavelength so it is a directly observable blue
-  suppression.
+  suppression. The reference wavelength and the fixed-depth scale prior are constructor
+  arguments (`lam_ref_aa`, `scale_prior_mean_aa`, `scale_prior_sigma_aa`), defaulting to the
+  LSST *ugrizy* values, so a different filter set can be configured without subclassing.
 - Experimental `RainbowFit` `spectral='sharp_bb'`: Planck times a sharp power-law-opacity blue
   cutoff, `tau = beta * (lambda_ref / lambda) ** 6` with `lambda_ref` at the bluest band, so
   `beta` *is* that band's optical depth. The opacity is localised to the blue (in the z band it
   is ~0.6% of its u-band value), leaving the red continuum to pin `T` — where `modified_bb`'s
   all-band tilt has to distort the red side and compensate with an unphysically cold
-  temperature.
+  temperature. `lam_ref_aa` is a constructor argument, defaulting to the LSST *u* effective
+  wavelength; set it to the bluest band of the filter set in use.
 
 ### Changed
 
