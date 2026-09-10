@@ -9,8 +9,10 @@ __all__ = [
     "BaseSpectralTerm",
     "PlanckSpectralTerm",
     "BlanketedPlanckSpectralTerm",
+    "FreeBlanketedPlanckSpectralTerm",
     "GenWienSpectralTerm",
     "ModifiedBlackBodySpectralTerm",
+    "SharpBlackBodySpectralTerm",
     "LogParabolaSpectralTerm",
 ]
 
@@ -175,8 +177,14 @@ class BlanketedPlanckSpectralTerm(BaseSpectralTerm):
     @staticmethod
     def initial_guesses(t, m, sigma, band):
         # ``T`` initial guess/limits come from the (shared) temperature term.
+        # Start strictly inside the bounds with a *live* gradient: at the lower bound
+        # (lambda_scale = 0.001) the extinction edge sits at a few Angstrom, tau is
+        # numerically 0 in every optical band and the gradient vanishes — a flat plateau
+        # the optimizer must escape before fitting anything. 0.25 is the median regime of
+        # typical fitted values (edge in the near-UV/blue); starts below ~0.1 leave the
+        # gradient too weak to reliably steer some term combinations to the right basin.
         return {
-            "lambda_scale": 0.001,
+            "lambda_scale": 0.25,
         }
 
     @staticmethod
@@ -229,6 +237,209 @@ class BlanketedPlanckSpectralTerm(BaseSpectralTerm):
         jac[0] = spec * tau * u / T_ref
         # ∂spec/∂λ_scale = -spec·∂τ/∂λ_scale = -spec·τ·u/λ_scale
         jac[1] = -spec * tau * u / lambda_scale
+        return jac
+
+
+@dataclass()
+class FreeBlanketedPlanckSpectralTerm(BaseSpectralTerm):
+    r"""Blackbody with a free-position blue blanketing edge (redshift-free).
+
+    .. math::
+        F(\lambda) = B_\nu(\lambda, T)\, e^{-\tau},\qquad
+        \tau = I\, e^{-\lambda / \lambda_s}\ \text{(fixed depth)},\qquad
+        \tau = \tau_\mathrm{ref}\, e^{(\lambda_\mathrm{ref} - \lambda)/\lambda_s}\ \text{(free depth)}
+
+    Same sharp blue-cutoff family as :class:`BlanketedPlanckSpectralTerm` (fully suppressed
+    blueward, Planck redward, with the cutoff near ``lambda_edge ~ ln(I)·lambda_s``), but the
+    edge scale ``lambda_s`` — parameter ``blanket_scale``, in angstrom — is a **free
+    observed-frame** quantity rather than ``∝ lambda_scale / T``.
+
+    Decoupling the edge from temperature is the whole point: the ``∝ lambda_scale/T`` coupling
+    of the original blanketed model makes the edge position and ``T`` enter only through their
+    ratio, which is what creates the strong ``(T, lambda_scale)`` degeneracy (median ``|ρ|``
+    ≈ 0.97 on mallorn supernovae). Letting the edge roam freely instead drops that to ``|ρ|``
+    ≈ 0.44 at no fit-quality cost, and needs **no redshift** — a free observed-frame edge
+    absorbs both the rest-frame break and the unknown ``z`` into one fitted number. The red
+    continuum is untouched, so ``T`` stays pinned by the red bands.
+
+    Parameters
+    ----------
+    free_depth : bool, optional
+        If False (default) the optical depth ``I`` is fixed at ``_intensity`` (a hard blue
+        blackout; the only fit parameter is ``blanket_scale``, carrying a prior
+        ``N(_scale_prior_mean_fixed, _scale_prior_sigma_fixed)`` anchored at the *sensitivity
+        edge*, which parks unblanketed sources at the limit below which the model is Planck
+        in every band, rather than in the degenerate blackbody-mimicking twin at ~650 A).
+        If True, the depth becomes a
+        second fit parameter ``blanket_depth`` (``≥ 0``, one-sided so it can only *suppress*
+        the blue, never enhance it), with a weak prior anchoring it to 0 (no blanketing).
+        Freeing the depth lets shallow-deficit sources use a soft edge instead of a forced
+        blackout, avoiding the temperature overheating that a fixed full depth induces.
+
+        ``blanket_depth`` is **anchored at a fixed reference wavelength**: it is the optical
+        depth ``tau`` at ``lambda_ref = _lam_ref_cm`` (~u band), not the ``lambda -> 0``
+        extrapolation ``I``. Anchoring at a data-relevant wavelength makes the depth a
+        directly observable quantity (the blue-band suppression is ``1 - exp(-blanket_depth)``
+        for an edge near the bands) and removes the long ``(scale, depth)`` ridge of the
+        ``I``-parametrization, where a small change of ``blanket_scale`` rescaled the
+        extrapolated ``I`` by orders of magnitude (population corr ~0.7 between the fitted
+        pair on thermal mallorn sources, ~0-0.3 once anchored). Both parameters carry weak
+        priors: depth toward 0 (no blanketing; its width ``_depth_prior_sigma`` directly
+        trades SN fit quality against temperature fidelity), and ``blanket_scale`` toward a
+        *low* anchor (``_scale_prior_mean``): with a free depth the edge position is
+        unconstrained whenever ``blanket_depth -> 0``, so unblanketed sources collapse to
+        the anchor — well below the ~500-1500 A range of genuinely blanketed sources, which
+        keeps them out of the measured distribution (and makes ``blanket_scale`` itself a
+        thermal/blanketed discriminant) — while the wide prior is overridden wherever the
+        data actually constrain the edge.
+
+    Notes
+    -----
+    Unlike :class:`BlanketedPlanckSpectralTerm`, this term does **not** share ``T`` with the
+    temperature term (no ``/T`` coupling), so the blackbody core uses the instantaneous
+    temperature only and ``dvalue_dT`` carries no extinction cross-term.
+    """
+
+    free_depth: bool = False
+
+    _intensity = 100.0  # fixed optical depth used when ``free_depth`` is False (hard blackout)
+    # Reference wavelength anchoring ``blanket_depth`` in free_depth mode: the depth is the
+    # optical depth at this wavelength, i.e. a directly observable blue suppression. It MUST
+    # sit at (or blueward of) the bluest band: if any band were blueward of the anchor, an
+    # ultra-sharp edge squeezed between them would amplify that band's optical depth above
+    # ``blanket_depth`` (tau scales as e^{(lam_ref - lam)/lam_s}), letting the fit buy blue
+    # suppression while dodging the depth prior. Default is the LSST u effective wavelength;
+    # adjust for filter sets with bluer coverage.
+    _lam_ref_cm = 3671e-8
+    # Weak N(0, sigma) prior anchoring blanket_depth (= tau at _lam_ref_cm) to 0 (no
+    # blanketing). This width is the chi2-vs-temperature-fidelity dial on heavily blanketed
+    # sources (mallorn SN Ia, median): 3.0 -> rchi2 0.95 / T 34% hot; 1.5 -> 0.99 / 27%;
+    # 0.75 -> 1.06 / 18%. Thermal sources stay clean (depth ~0, T within 1%) throughout.
+    _depth_prior_sigma = 0.75
+    # Weak prior anchoring the edge position (angstrom) when free_depth is on. Whenever
+    # blanket_depth -> 0 (an unblanketed source) the likelihood is exactly flat in
+    # blanket_scale, so the prior alone decides where it parks; without it the parameter
+    # rails to a bound. The mean is deliberately a *low interior* value, well below the
+    # range genuinely blanketed sources occupy (~500-1500 A): unconstrained objects then
+    # collapse to ~100 instead of sitting amid real measurements, making blanket_scale
+    # itself usable to separate unblanketed from blanketed sources. It must stay interior
+    # (not at the lower bound) to avoid on-bound convergence pathologies; the wide sigma
+    # makes the pull negligible wherever the data actually constrain the edge.
+    _scale_prior_mean = 100.0
+    _scale_prior_sigma = 1500.0
+    # Fixed-depth mode anchors the scale at the *sensitivity edge* instead, with a much
+    # tighter sigma. Without a depth off-switch, thermal (unblanketed) sources have a
+    # degenerate "twin" solution at scale ~650-1000 A (hotter blackbody x blue edge ~ cooler
+    # blackbody), and the fit has to choose between two wells on tiny chi2 differences.
+    #
+    # Two facts set these numbers. (1) With the depth fixed at ``_intensity`` the edge sits
+    # near ``ln(I)*lambda_s``, so below ~400-500 A the suppression in the bluest band drops
+    # under a percent: the model is Planck in every band, the likelihood is exactly flat and
+    # every value there describes the same observable spectrum. Anchoring at 100 A spent the
+    # prior's pull inside that dead zone, where it buys nothing, and needed a wide sigma to
+    # still reach the twin -- which then also dragged down genuine detections. Anchoring at
+    # the edge puts the whole gradient where the parameter is actually observable, and makes
+    # the parked value an honest upper limit ("edge not detectable") rather than a specific
+    # value the data never measured. (2) On mallorn the twin's typical chi2 advantage is
+    # ~1, so the prior only has to charge a bit more than that at ~700 A: sigma 200 gives
+    # ((700-500)/200)^2 = 1.0 at the twin and only ((900-500)/200)^2 = 4 at a real SN edge,
+    # whose median chi2 gain is ~8.
+    #
+    # Measured on 670 mallorn objects (350 AGN+TDE, 320 SNe), thermal leak above 600 A vs
+    # SNe kept above 600 A vs AUC of the SN/thermal separation:
+    #   anchor 100, sigma 600 (previous):  13.1% / 81.2% / 0.874, null parks at 113 A
+    #   anchor 500, sigma 200 (this):      10.0% / 78.8% / 0.872, null parks at 488 A
+    #   anchor 500, sigma 150:              5.1% / 73.1% / 0.869
+    #   anchor 100, sigma 350:              4.6% / 73.1% / 0.855  (same leak, worse AUC)
+    # Tighten sigma toward 150 when clean thermal nulls matter more than SN completeness;
+    # the leak/completeness trade is an information limit (the faintest quartile of SNe gains
+    # as little chi2 as the strongest tenth of thermal sources), so no anchor escapes it.
+    # NB these two constants apply to fixed-depth mode only; the free-depth branch keeps the
+    # low anchor above, where the depth parameter -- not the scale -- carries the null.
+    _scale_prior_mean_fixed = 500.0
+    _scale_prior_sigma_fixed = 200.0
+
+    def parameter_names(self):
+        return ["blanket_scale", "blanket_depth"] if self.free_depth else ["blanket_scale"]
+
+    def parameter_scalings(self):
+        return [None, None] if self.free_depth else [None]
+
+    def _tau(self, wave_cm, params):
+        """Optical depth and its derivative w.r.t. ``blanket_depth`` (None in fixed mode).
+
+        Fixed mode: ``tau = I·e^{-lambda/lambda_s}``. Free mode (anchored): ``tau =
+        depth·e^{(lambda_ref - lambda)/lambda_s}``; the exponent is clipped so that
+        wavelengths far blueward of the reference with a tiny scale cannot overflow — the
+        suppression there is total anyway (``value`` underflows to 0) and the clipped
+        derivatives stay consistently 0.
+        """
+        lam_cm = params[0] * 1e-8  # blanket_scale is in angstrom
+        if self.free_depth:
+            dtau_ddepth = np.exp(np.minimum((self._lam_ref_cm - wave_cm) / lam_cm, 50.0))
+            return params[1] * dtau_ddepth, dtau_ddepth
+        return self._intensity * np.exp(-wave_cm / lam_cm), None
+
+    def value(self, wave_cm, T, *params):
+        tau, _ = self._tau(wave_cm, params)
+        return PlanckSpectralTerm.value(wave_cm, T) * np.exp(-tau)
+
+    def initial_guesses(self, t, m, sigma, band):
+        if self.free_depth:
+            # Start mid-range, NOT at the low prior anchor: from a small scale the suppression
+            # of every band redward of the reference is exponentially tiny, so the gradient
+            # toward a broad (g-band-reaching) edge vanishes and blanketed sources would get
+            # stranded in a u-only local minimum. From mid-range both directions have signal;
+            # unblanketed sources still slide down the prior gradient to the anchor.
+            return {"blanket_scale": 700.0, "blanket_depth": 0.1}
+        # Mid-range for the same stranding reason: at the prior anchor the in-band suppression
+        # (and so the likelihood gradient) is ~e^{-37}, invisible next to even the weak prior
+        # gradient, and every fit would get trapped at the anchor.
+        return {"blanket_scale": 700.0}
+
+    def limits(self, t, m, sigma, band):
+        limits = {"blanket_scale": (20.0, 3000.0)}  # edge ~ ln(I)*lambda_s ~ 90..13800 A
+        if self.free_depth:
+            # tau_ref > ~20 is already a saturated blackout at the reference wavelength
+            # (exp(-20) ~ 0), so a wider bound buys nothing physically while widening the
+            # iminuit lower-bound barrier, which repels depth from its null (0) and floors
+            # unblanketed sources at ~(1e-4 * width * sigma_prior^2)^(1/3). The least_squares
+            # backend has no barrier and reaches depth -> 0 regardless.
+            limits["blanket_depth"] = (0.0, 20.0)
+        return limits
+
+    def parameter_priors(self):
+        cls = FreeBlanketedPlanckSpectralTerm
+        if self.free_depth:
+            # depth -> 0 anchors the "is it blanketed" amount; the scale prior only stabilizes
+            # the position when depth is small (it is a no-op once the data constrain the edge).
+            return {
+                "blanket_depth": (0.0, cls._depth_prior_sigma),
+                "blanket_scale": (cls._scale_prior_mean, cls._scale_prior_sigma),
+            }
+        # Fixed depth: scale prior anchored at the sensitivity edge, tight enough to tip
+        # unblanketed sources out of the degenerate twin basin (see _scale_prior_mean_fixed).
+        return {"blanket_scale": (cls._scale_prior_mean_fixed, cls._scale_prior_sigma_fixed)}
+
+    def dvalue_dT(self, wave_cm, T, *params):
+        """∂(spec)/∂T w.r.t. the instantaneous temperature only (the edge is T-independent)."""
+        tau, _ = self._tau(wave_cm, params)
+        return PlanckSpectralTerm.dvalue_dT(wave_cm, T) * np.exp(-tau)
+
+    def derivatives(self, wave_cm, T, *params):
+        """∂(spec)/∂(blanket_scale[, blanket_depth]); shape (n_params, len(wave_cm))."""
+        lam_cm = params[0] * 1e-8
+        tau, dtau_ddepth = self._tau(wave_cm, params)
+        value = PlanckSpectralTerm.value(wave_cm, T) * np.exp(-tau)
+        jac = np.zeros((2 if self.free_depth else 1, len(wave_cm)))
+        if self.free_depth:
+            # τ = depth·e^{(λ_ref-λ)/λ_s}: ∂τ/∂λ_s = τ·(λ-λ_ref)/λ_s²; blanket_scale in Å (×1e-8)
+            jac[0] = -value * tau * (wave_cm - self._lam_ref_cm) / lam_cm**2 * 1e-8
+            # ∂τ/∂depth = e^{(λ_ref-λ)/λ_s}
+            jac[1] = -value * dtau_ddepth
+        else:
+            # τ = I·e^{-λ/λ_s}: ∂τ/∂λ_s = τ·λ/λ_s²
+            jac[0] = -value * tau * wave_cm / lam_cm**2 * 1e-8
         return jac
 
 
@@ -398,6 +609,85 @@ class ModifiedBlackBodySpectralTerm(BaseSpectralTerm):
 
 
 @dataclass()
+class SharpBlackBodySpectralTerm(BaseSpectralTerm):
+    r"""Planck spectrum with a sharp power-law-opacity blue suppression.
+
+    .. math::
+        F(\lambda) = B_\nu(\lambda, T)\, e^{-\tau},\qquad
+        \tau = \beta\,\Big(\frac{\lambda_\mathrm{ref}}{\lambda}\Big)^{\texttt{sharpness}}
+
+    A *sharpened* :class:`ModifiedBlackBodySpectralTerm`: the two are one continuous
+    family. Expanding the opacity for ``sharpness -> 0`` gives ``tau ~ beta +
+    beta·sharpness·ln(lambda_ref/lambda)``; the constant is a grey rescaling absorbed by
+    the bolometric amplitude and the rest is exactly the modified-blackbody tilt with a
+    rescaled exponent. At the default ``sharpness = 6`` the opacity is instead strongly
+    localized to the blue (``tau`` in the z band is ~0.6% of its u-band value), which is
+    the point: ``modified_bb``'s logarithmic tilt is the *gentlest* possible opacity,
+    spread over all bands, so fitting a sharp blue deficit forces it to distort the red
+    side and compensate with an unphysically low temperature (mallorn SNe:
+    ``T``/``T_planck`` ~ 0.6, ``beta`` railed negative). Here the red bands stay clean,
+    pinning ``T``, and the suppression is carried by ``beta`` alone (mallorn SN Ia:
+    ``T``/``T_planck`` 0.62 -> 1.15, chi2 0.98 -> 1.08 — the modest chi2 cost is the price
+    of refusing the unphysical cold corner).
+
+    The parameter is named ``beta`` for drop-in consistency with ``modified_bb`` (same
+    role: the single blue-deviation strength, 0 = exact Planck), but it is **not**
+    numerically comparable — here it is an optical *depth*, not a tilt exponent, and on
+    blanketed SNe it lands positive (~+1) where the modified-blackbody tilt rails negative
+    (~-2). ``lambda_ref`` sits at the bluest band, so ``beta`` *is* the u-band optical
+    depth (blue suppression ``1 - exp(-beta)``) — a directly observable quantity, anchored
+    to 0 (exact Planck) by a weak Gaussian prior like the other deviation terms. Thermal
+    sources recover ``beta ~ 0`` with ``T`` within 1% of the pure-Planck fit.
+
+    ``sharpness`` is a fixed design constant, not a fit parameter (4-6 perform nearly
+    identically on mallorn; sub-1 values reproduce the modified-blackbody behavior,
+    including its temperature degeneracy).
+    """
+
+    sharpness: float = 6.0
+
+    _lam_ref_cm = 3671e-8  # bluest (u) band: beta is the u-band optical depth
+    _prior_sigma = 0.75
+
+    def parameter_names(self):
+        return ["beta"]
+
+    def parameter_scalings(self):
+        return [None]
+
+    def _tau(self, wave_cm, beta):
+        # Clip from below: a negative beta (blue boost) with far-UV wavelengths would
+        # otherwise overflow exp(-tau); in-band optical values are far from the clip.
+        return np.maximum(beta * (self._lam_ref_cm / wave_cm) ** self.sharpness, -50.0)
+
+    def value(self, wave_cm, T, beta):
+        return PlanckSpectralTerm.value(wave_cm, T) * np.exp(-self._tau(wave_cm, beta))
+
+    def dvalue_dT(self, wave_cm, T, beta):
+        """∂(value)/∂T = ∂Planck/∂T · e^{-τ} (the opacity is T-independent)."""
+        return PlanckSpectralTerm.dvalue_dT(wave_cm, T) * np.exp(-self._tau(wave_cm, beta))
+
+    def derivatives(self, wave_cm, T, beta):
+        """∂(value)/∂beta = -value·(λ_ref/λ)^sharpness; shape (1, len(wave_cm))."""
+        r = (self._lam_ref_cm / wave_cm) ** self.sharpness
+        value = PlanckSpectralTerm.value(wave_cm, T) * np.exp(-self._tau(wave_cm, beta))
+        jac = np.zeros((1, len(wave_cm)))
+        jac[0] = -value * r
+        return jac
+
+    def initial_guesses(self, t, m, sigma, band):
+        return {"beta": 0.0}
+
+    def limits(self, t, m, sigma, band):
+        # beta > ~20 is a saturated u-band blackout; small negative values allow a mild
+        # localized blue excess (the analogue of modified_bb's negative beta).
+        return {"beta": (-2.0, 20.0)}
+
+    def parameter_priors(self):
+        return {"beta": (0.0, self._prior_sigma)}
+
+
+@dataclass()
 class LogParabolaSpectralTerm(BaseSpectralTerm):
     r"""Log-parabola modification of a Planck spectrum.
 
@@ -472,7 +762,13 @@ class LogParabolaSpectralTerm(BaseSpectralTerm):
 spectral_terms = {
     "planck": PlanckSpectralTerm,
     "blanketed": BlanketedPlanckSpectralTerm,
+    # Default (fixed-depth) instance; pass FreeBlanketedPlanckSpectralTerm(free_depth=True)
+    # explicitly as the `spectral=` argument for the free-depth variant.
+    "free_blanketed": FreeBlanketedPlanckSpectralTerm(),
     "genwien": GenWienSpectralTerm,
     "modified_bb": ModifiedBlackBodySpectralTerm,
+    # Default-sharpness instance; pass SharpBlackBodySpectralTerm(sharpness=...) explicitly
+    # as the `spectral=` argument to tune the opacity steepness.
+    "sharp_bb": SharpBlackBodySpectralTerm(),
     "logparabola": LogParabolaSpectralTerm,
 }

@@ -9,11 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
---
+- Experimental `RainbowFit` `spectral='free_blanketed'`: blackbody with a blue blanketing edge
+  whose position is a free **observer-frame** wavelength (`blanket_scale`, in angstrom) rather
+  than a quantity coupled to the temperature. Decoupling the edge from `T` drops the
+  `(T, edge)` correlation from ~0.97 to ~0.44 at no fit-quality cost, and needs **no redshift** —
+  a free observer-frame edge absorbs both the rest-frame break and the unknown `z` into one
+  fitted number. `FreeBlanketedPlanckSpectralTerm(free_depth=True)` additionally frees the
+  optical depth, anchored at a fixed reference wavelength so it is a directly observable blue
+  suppression.
+- Experimental `RainbowFit` `spectral='sharp_bb'`: Planck times a sharp power-law-opacity blue
+  cutoff, `tau = beta * (lambda_ref / lambda) ** 6` with `lambda_ref` at the bluest band, so
+  `beta` *is* that band's optical depth. The opacity is localised to the blue (in the z band it
+  is ~0.6% of its u-band value), leaving the red continuum to pin `T` — where `modified_bb`'s
+  all-band tilt has to distort the red side and compensate with an unphysically cold
+  temperature.
 
 ### Changed
 
---
+- Experimental `RainbowFit` `spectral='blanketed'`: the `lambda_scale` initial guess moved from
+  0.001 (exactly the lower bound, where the extinction is numerically zero and its gradient
+  vanishes — a flat plateau the optimizer had to escape) to 0.25, strictly inside the bounds
+  with a live gradient. Fit results are unchanged on synthetic checks; convergence no longer
+  relies on the Migrad/Hesse retry loop to leave the plateau.
+- Experimental `RainbowFit` `spectral='free_blanketed'` (fixed-depth mode only): the
+  `blanket_scale` prior moved from `N(100 Å, 600 Å)` to `N(500 Å, 200 Å)`, i.e. anchored at the
+  sensitivity edge instead of deep inside the range where the model is Planck in every band and
+  the likelihood is flat. The old low anchor spent its pull where the parameter is unobservable
+  and needed a wide sigma to still reach the degenerate blackbody-mimicking solution near
+  700–1000 Å, which left thermal sources choosing between two wells on a chi2 difference of ~1.
+  On a simulated LSST transient sample the fraction of AGN/TDE landing above 600 Å drops from
+  13.5%/11.7% to 9.6%/9.1%, their fitted temperature loses the compensating bias (median
+  8800 K → 6100 K for the recovered objects), and the null now parks at the detection limit
+  instead of at an unmeasured 100 Å. Supernovae kept above 600 Å go from 77.6% to 75.0%. The
+  free-depth branch is unchanged.
 
 ### Deprecated
 

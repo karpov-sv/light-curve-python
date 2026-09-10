@@ -41,6 +41,8 @@ PARAM_VALUES = {
     "t_color": 8.0,
     "t_delay": 3.0,
     "lambda_scale": 0.3,
+    "blanket_scale": 1000.0,
+    "blanket_depth": 2.0,
     "beta": 0.7,
     "sp_a": 0.4,
     "sp_b": -0.25,
@@ -154,6 +156,35 @@ def test_full_model_jacobian(bolometric, temperature, spectral):
             dtype=float,
         )
 
+        analytic = feature._lsq_jac(x, *params)
+        fd = _fd_columns(lambda p: feature._lsq_model(x, *p), params)
+        _assert_jac_close(analytic, fd)
+
+
+def test_free_blanketed_free_depth_full_jacobian():
+    """The free-depth FreeBlanketed variant is only reachable via an explicit instance, so
+    cover its 2-parameter (blanket_scale, blanket_depth) Jacobian separately."""
+    from light_curve.light_curve_py.features.rainbow.spectral import FreeBlanketedPlanckSpectralTerm
+
+    band = np.array([list(BAND_WAVE_AA)[i % len(BAND_WAVE_AA)] for i in range(len(T_GRID))])
+    for with_baseline in (False, True):
+        feature = RainbowFit.from_angstrom(
+            BAND_WAVE_AA,
+            with_baseline=with_baseline,
+            bolometric="bazin",
+            temperature="delayed_sigmoid",
+            spectral=FreeBlanketedPlanckSpectralTerm(free_depth=True),
+        )
+        assert "blanket_depth" in feature.names
+        assert feature._lsq_jac is not None
+
+        band_idx = feature.bands.get_index(band)
+        wave_cm = feature.bands.index_to_wave_cm(band_idx)
+        x = (T_GRID, band_idx, wave_cm)
+        params = np.array(
+            [0.2 if name.startswith("baseline_") else PARAM_VALUES[name] for name in feature.names],
+            dtype=float,
+        )
         analytic = feature._lsq_jac(x, *params)
         fd = _fd_columns(lambda p: feature._lsq_model(x, *p), params)
         _assert_jac_close(analytic, fd)
